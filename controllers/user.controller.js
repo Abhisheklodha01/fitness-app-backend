@@ -115,4 +115,14 @@ export const LogoutController = async (req, res) => {
     }
 }
 
+export const getUserDetailsController = async (req, res) => {
+    try {
+        res.status(200).json({
+            success: true,
+            user: req.user
+        })
+    } catch (error) {
+      console.log("something went wrong");
+    }
+}
 
