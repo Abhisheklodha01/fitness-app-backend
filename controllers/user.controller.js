@@ -1,11 +1,16 @@
 import jwt from 'jsonwebtoken'
 import bcryptjs from 'bcryptjs'
+import { config } from 'dotenv'
 import { User } from '../models/user.model.js'
+
+config({
+    path: './.env'
+})
 
 export const RegisterController = async (req, res) => {
     try {
         const { username, email, password } = req.body
-        if (!(username || email || password)) {
+        if (!username || !email || !password) {
             return res.json({
                 success: false,
                 message: "All fields are required"
@@ -35,7 +40,6 @@ export const RegisterController = async (req, res) => {
         })
 
     } catch (error) {
-        console.log(error);
         return res.status(500).json({
             success: false,
             message: "Something went wrong"
@@ -48,7 +52,7 @@ export const RegisterController = async (req, res) => {
 export const LoginController = async (req, res) => {
     try {
         const { email, password } = req.body
-        if (!(email || password)) {
+        if (!email || !password) {
             return res.json({
                 success: false,
                 message: "All fields are required"
@@ -71,14 +75,21 @@ export const LoginController = async (req, res) => {
             })
         }
 
-        return res.status(201).json({
+        const token = jwt.sign({ _id: user._id }, process.env.JWT_KEY, {
+            expiresIn: process.env.ACCESS_TOKEN_EXPIRY
+
+        })
+
+        return res.cookie("accessToken", token, {
+            httpOnly: true,
+            secure: true
+        }).status(201).json({
             success: true,
-            message: "LoggedIn successfully",
+            message: `welcome back ${user.username}`,
             user
         })
 
     } catch (error) {
-        console.log(error);
         return res.status(500).json({
             success: false,
             message: "Something went wrong",
@@ -86,6 +97,22 @@ export const LoginController = async (req, res) => {
     }
 }
 
+export const LogoutController = async (req, res) => {
+    try {
+        return res.status(200).clearCookie("accessToken", {
+            httpOnly: true,
+            secure: true
+        }).json({
+            success: true,
+            message: "Logged out successfully"
+        })
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Unable to logout please try again"
+        })
 
+    }
+}
 
 
