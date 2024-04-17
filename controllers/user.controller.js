@@ -40,7 +40,7 @@ export const LoginUser = async (req, res, next) => {
         return next(new ErrorHandler(400, "Invalid password"))
       }
 
-      SendCookie(user, res, `Welcome back ${user.name}`, 201);
+      SendCookie(user, res, `Welcome back ${user.username}`, 201);
     }
   } catch (error) {
     next(error)
