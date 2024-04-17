@@ -7,30 +7,28 @@ config({
     path: './.env'
 })
 
+
 export const isAuthenticated = async (req, res, next) => {
-    console.log(req);
-    try {
-        const { accessToken } = req.cookies
-        if (!accessToken) {
-            res.status(400).json({
-                success: false,
-                message: "Please login or register"
-            })
-        }
+   try {
 
-        const decodedToken = jwt.verify(accessToken, process.env.JWT_KEY)
-        const user = await User.findById(decodedToken?._id).select("-password")
-        console.log(user);
-        if (!user) {
-            res.status(400).json({
-                success: false,
-                message: "Invalid access token"
-            })
-        }
-        req.user = user
-        next()
+      const { token } = req.cookies;
+      if (!token) {
+         res.status(400).json({
+            success: false,
+            message: "Please Login First",
+         });
+      }
+      else {
+         const decoded = jwt.verify(token, process.env.JWT_SECRET);
+         const id = decoded._id;
+         req.user = await User.findById(id);
+         next()
+      }
 
-    } catch (error) {
-        console.log(error);
-    }
+   } catch (error) {
+      res.status(404).json({
+         success: false,
+         message: "something Went Wrong"
+      })
+   }
 }
