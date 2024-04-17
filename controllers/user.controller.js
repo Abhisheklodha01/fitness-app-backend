@@ -81,8 +81,7 @@ export const LoginController = async (req, res) => {
         })
 
         return res.cookie("accessToken", token, {
-            httpOnly: true,
-            secure: true
+            httpOnly: true
         }).status(201).json({
             success: true,
             message: `welcome back ${user.username}`,
@@ -101,7 +100,6 @@ export const LogoutController = async (req, res) => {
     try {
         return res.status(200).clearCookie("accessToken", {
             httpOnly: true,
-            secure: true
         }).json({
             success: true,
             message: "Logged out successfully"
