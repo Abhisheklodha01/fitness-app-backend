@@ -1,34 +1,29 @@
 import { config } from 'dotenv'
 import jwt from 'jsonwebtoken'
 import { User } from '../models/user.model.js'
+import ErrorHandler from '../utils/apiError.js'
 
 
 config({
-    path: './.env'
+   path: './.env'
 })
 
 
 export const isAuthenticated = async (req, res, next) => {
    try {
-
       const { token } = req.cookies;
+      console.log(token);
+      console.log(req.user);
       if (!token) {
-         res.status(400).json({
-            success: false,
-            message: "Please Login First",
-         });
+         return next(new ErrorHandler((400, "invalid access token")))
       }
-      else {
-         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-         const id = decoded._id;
-         req.user = await User.findById(id);
-         next()
-      }
+
+      const decodedtoken = jwt.verify(token, process.env.JWT_SECRET);
+      const user = await User.findById(decodedtoken?._id).select("-password");
+      req.user = user
+      next()
 
    } catch (error) {
-      res.status(404).json({
-         success: false,
-         message: "something Went Wrong"
-      })
+      return next(new ErrorHandler(401, "something went wrong"))
    }
 }

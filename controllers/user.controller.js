@@ -1,7 +1,7 @@
 import { User } from "../models/user.model.js";
 import bcryptjs from "bcryptjs";
-import { SendCookie } from "../utils/features.js";
 import ErrorHandler from "../utils/apiError.js";
+import jwt from 'jsonwebtoken'
 
 
 export const RegisterUser = async (req, res, next) => {
@@ -20,7 +20,14 @@ export const RegisterUser = async (req, res, next) => {
         password: hashPassword,
       });
 
-      SendCookie(user, res, "Registered Successfully", 201);
+      const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET)
+      return res.status(200).cookie("token", token, {
+        expiresIn: "1d"
+      }).json({
+        success: true,
+        message: "Registerd successfully",
+        user
+      })
     }
   } catch (error) {
     next(error)
@@ -34,37 +41,36 @@ export const LoginUser = async (req, res, next) => {
 
     if (!user) {
       return next(new ErrorHandler(400, "user does not exists"))
-    } else {
-      const isMatch = await bcryptjs.compare(password, user.password);
-      if (!isMatch) {
-        return next(new ErrorHandler(400, "Invalid password"))
-      }
-
-      SendCookie(user, res, `Welcome back ${user.username}`, 201);
     }
+
+    const isMatch = await bcryptjs.compare(password, user.password);
+    if (!isMatch) {
+      return next(new ErrorHandler(400, "Invalid password"))
+    }
+    const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET)
+    return res.status(200).cookie("token", token, {
+      expiresIn: "1d"
+    }).json({
+      success: true,
+      message: "Registerd successfully",
+      user
+    })
   } catch (error) {
     next(error)
   }
 };
 
 export const GetMyProfile = (req, res) => {
-  res.status(200).json({
+  return res.status(200).json({
     success: true,
     user: req.user
   })
 };
 
 
-export const Logout = (req, res) => {
-
-  res.status(200)
-    .cookie("token", "", {
-      expiresIn: Date.now(),
-      sameSite: process.env.NODE_ENV === "Dovelopment" ? "lax" : "none",
-      secure: process.env.NODE_ENV === "Dovelopment" ? false : true
-    })
-    .json({
-      success: true,
-      message: " logout SuccessFully"
-    })
+export const Logout = (req, res, next) => {
+  return res.clearCookie("token").json({
+    success: true,
+    message: "Loggedout Successfully"
+  })
 }
