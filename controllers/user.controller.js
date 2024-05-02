@@ -65,6 +65,7 @@ export const GetMyProfile = (req, res) => {
     success: true,
     user: req.user
   })
+  
 };
 
 
