@@ -49,7 +49,7 @@ export const LoginUser = async (req, res, next) => {
     const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET)
     return res.status(200).json({
       success: true,
-      message: "Registerd successfully",
+      message: "LoggedIn successfully",
       user,
       token
     })
