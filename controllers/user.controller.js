@@ -21,12 +21,11 @@ export const RegisterUser = async (req, res, next) => {
       });
 
       const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET)
-      return res.status(200).cookie("token", token, {
-        expiresIn: "1d"
-      }).json({
+      return res.status(200).json({
         success: true,
         message: "Registerd successfully",
-        user
+        user,
+        token
       })
     }
   } catch (error) {
@@ -48,12 +47,11 @@ export const LoginUser = async (req, res, next) => {
       return next(new ErrorHandler(400, "Invalid password"))
     }
     const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET)
-    return res.status(200).cookie("token", token, {
-      expiresIn: "1d"
-    }).json({
+    return res.status(200).json({
       success: true,
       message: "Registerd successfully",
-      user
+      user,
+      token
     })
   } catch (error) {
     next(error)
@@ -67,11 +65,3 @@ export const GetMyProfile = (req, res) => {
   })
   
 };
-
-
-export const Logout = (req, res, next) => {
-  return res.clearCookie("token").json({
-    success: true,
-    message: "Loggedout Successfully"
-  })
-}

@@ -11,7 +11,9 @@ config({
 
 export const isAuthenticated = async (req, res, next) => {
    try {
-      const { token } = req.cookies;
+      const reqToken = req.headers['authorization'];
+      const bearerToken = reqToken.split(" ")
+      const token = bearerToken[1]
       if (!token) {
          return next(new ErrorHandler((400, "invalid access token")))
       }
